@@ -5,11 +5,17 @@
 
 # 颜色常量
 RED='\033[0;31m'
+# shellcheck disable=SC2034  # 颜色常量,供下游 source 脚本使用
 GREEN='\033[0;32m'
+# shellcheck disable=SC2034
 YELLOW='\033[1;33m'
+# shellcheck disable=SC2034
 BLUE='\033[0;34m'
+# shellcheck disable=SC2034
 CYAN='\033[0;36m'
+# shellcheck disable=SC2034
 BOLD='\033[1m'
+# shellcheck disable=SC2034
 NC='\033[0m'
 
 # 确保 jq 已安装

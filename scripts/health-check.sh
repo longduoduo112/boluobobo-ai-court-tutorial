@@ -17,6 +17,7 @@ set -e
 
 # 配置
 ALERT_THRESHOLD_FAILURE_RATE=30    # 失败率超过 30% 告警
+# shellcheck disable=SC2034  # 配置常量,后续模块用
 ALERT_THRESHOLD_COST_DAILY=50      # 日费用超过 $50 告警
 ALERT_CHANNEL="feishu"             # 告警通道：feishu/discord/email
 
@@ -24,8 +25,8 @@ ALERT_CHANNEL="feishu"             # 告警通道：feishu/discord/email
 check_dependencies() {
   local missing=()
   for cmd in jq bc curl; do
-    if ! command -v $cmd &>/dev/null; then
-      missing+=($cmd)
+    if ! command -v "$cmd" &>/dev/null; then
+      missing+=("$cmd")
     fi
   done
   if [ ${#missing[@]} -gt 0 ]; then
@@ -133,8 +134,9 @@ check_task_failure_rate() {
   fi
   
   # 统计失败率
-  local total=$(jq '.tasks | length' "$HOME/.clawd/task-store/tasks.json" 2>/dev/null || echo 0)
-  local failed=$(jq '[.tasks[].steps[] | select(.status == "failed")] | length' "$HOME/.clawd/task-store/tasks.json" 2>/dev/null || echo 0)
+  local total failed
+  total=$(jq '.tasks | length' "$HOME/.clawd/task-store/tasks.json" 2>/dev/null || echo 0)
+  failed=$(jq '[.tasks[].steps[] | select(.status == "failed")] | length' "$HOME/.clawd/task-store/tasks.json" 2>/dev/null || echo 0)
   
   if [ "$total" -eq 0 ]; then
     log "  ${YELLOW}⚠${NC} 无任务记录"
@@ -166,11 +168,12 @@ check_api_cost() {
   # 示例：DashScope / OpenAI / Anthropic
   
   # 简单检查：查看日志中的 token 消耗
-  local today_logs=$(find "$HOME/.clawd/logs" -name "*.log" -mtime -1 -exec cat {} \; 2>/dev/null || true)
-  local token_usage=$(echo "$today_logs" | grep -o '"total_tokens": [0-9]*' | awk -F': ' '{sum+=$2} END {print sum+0}')
-  
+  local today_logs token_usage estimated_cost
+  today_logs=$(find "$HOME/.clawd/logs" -name "*.log" -mtime -1 -exec cat {} \; 2>/dev/null || true)
+  token_usage=$(echo "$today_logs" | grep -o '"total_tokens": [0-9]*' | awk -F': ' '{sum+=$2} END {print sum+0}')
+
   # 粗略估算：1000 tokens ≈ $0.01（实际根据模型不同）
-  local estimated_cost=$(echo "scale=2; $token_usage * 0.01 / 1000" | bc 2>/dev/null || echo "0")
+  estimated_cost=$(echo "scale=2; $token_usage * 0.01 / 1000" | bc 2>/dev/null || echo "0")
   
   log "  今日 Token 消耗：$token_usage, 估算费用：\$${estimated_cost}"
   
@@ -191,8 +194,9 @@ check_api_cost() {
 
 check_disk_space() {
   log "🔍 检查磁盘空间..."
-  
-  local usage=$(df -h "$HOME" | awk 'NR==2 {print $5}' | sed 's/%//')
+
+  local usage
+  usage=$(df -h "$HOME" | awk 'NR==2 {print $5}' | sed 's/%//')
   
   log "  磁盘使用率：${usage}%"
   
@@ -216,8 +220,9 @@ check_disk_space() {
 
 check_memory() {
   log "🔍 检查内存使用..."
-  
-  local usage=$(free | awk 'NR==2 {printf "%.0f", $3*100/$2}')
+
+  local usage
+  usage=$(free | awk 'NR==2 {printf "%.0f", $3*100/$2}')
   
   log "  内存使用率：${usage}%"
   

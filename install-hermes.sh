@@ -172,7 +172,8 @@ if [ -d "$PERSONA_SRC" ]; then
     cp -n "$PERSONA_SRC"/*.md "$HERMES_HOME/personalities/" 2>/dev/null || true
     PERSONA_COUNT=$(ls "$HERMES_HOME/personalities/"*.md 2>/dev/null | wc -l | tr -d ' ')
     echo -e "${GREEN}✓ 当前已安装 $PERSONA_COUNT 个角色${NC}"
-    echo "  完整 14 角色可后续运行: hermes claw migrate (从已有 OpenClaw 配置迁移)"
+    echo "  本仓库 configs/hermes/personalities/ 已包含全部 19 角色"
+    echo "  从已有 OpenClaw 自定义配置迁移可跑: hermes claw migrate"
 else
     echo -e "${YELLOW}⚠ $PERSONA_SRC 不存在,跳过${NC}"
 fi

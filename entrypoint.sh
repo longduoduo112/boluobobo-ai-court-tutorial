@@ -62,6 +62,7 @@ else
     # 启动内部 OpenClaw Gateway
     echo "启动 OpenClaw Gateway..."
     openclaw gateway --verbose &
+    # shellcheck disable=SC2034  # 保留 PID 供后续 trap/wait 用,exec node 后该变量自然失效
     GATEWAY_PID=$!
     
     # 等待 Gateway 启动
